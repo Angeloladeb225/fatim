@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coucou Fatim — Programme d'interaction v1.6</title>
+  <meta name="description" content="Petite page fun & respectueuse pour discuter ou décliner en paix.">
+  <style>
+    :root{--bg:#000;--fg:#00ff7f;--dim:#17a36d;--accent:#9effc8;--overlay:rgba(0,0,0,.86)}
+    html,body{background:var(--bg);color:var(--fg);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;margin:0}
+    .wrap{max-width:780px;margin:0 auto;padding:24px}
+    h1,h2,p{margin:0 0 12px}
+    .blink{animation:blink 1s step-end infinite}
+    @keyframes blink{50%{opacity:0}}
+    .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .badge{border:1px solid var(--accent);color:var(--accent);padding:4px 8px;border-radius:999px;font-size:12px}
+    .box{border:1px solid var(--dim);padding:16px;border-radius:8px;margin:16px 0}
+    .q{margin:16px 0 8px;color:var(--accent)}
+    .choices{display:flex;flex-wrap:wrap;gap:8px}
+    .btn{border:1px solid var(--dim);color:var(--fg);background:transparent;padding:8px 10px;border-radius:6px;cursor:pointer}
+    .btn:hover{border-color:var(--fg)}
+    .btn.selected{background:#032; border-color:var(--fg)}
+    .actions{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;align-items:center}
+    .action{color:var(--fg);text-decoration:none;border:1px solid var(--dim);padding:10px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+    .action:hover{border-color:var(--fg)}
+    .hint{margin:14px 0 8px;color:#9effc8;opacity:.9}
+    .footer{margin-top:28px;color:#7fffb8}
+    .small{font-size:12px;color:#7fffb8}
+
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+    .modal{background:#001a12;border:1px solid var(--accent);border-radius:12px;max-width:640px;width:100%;padding:24px;box-shadow:0 0 0 2px #003;}
+    .modal h3{margin:0 0 10px;color:var(--accent)}
+    .modal p{margin:0 0 16px}
+    .modal .big{font-size:36px;line-height:1.15;font-weight:800;text-align:center;margin:8px 0 8px;color:#b5ffd8}
+    .modal .sub{opacity:.9;color:#9effc8;margin:0 0 18px}
+    .modal .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .modal .row .btn{padding:10px 14px}
+    .preview{background:#00150f;border:1px dashed var(--accent);border-radius:8px;padding:12px;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h2>&gt; Coucou Fatim <span style="opacity:.8">— mode terminal</span><span class="blink">_</span></h2>
+      <span class="badge">v1.6</span>
+    </div>
+    <p>&gt; Booting system... OK<br>&gt; Curiosité détectée... OK</p>
+
+    <div class="box" id="quiz">
+      <div class="q">1) Je suis tout le temps en mode…</div>
+      <div class="choices" data-q="q1" data-label="Je suis tout le temps en mode">
+        <button class="btn" type="button">😴 J'ai sommeil encore 5mn</button>
+        <button class="btn" type="button">🍽️ Food is life</button>
+        <button class="btn" type="button">🎉 C'est vendreday fami</button>
+      </div>
+
+      <div class="q">2) Sérieux, tu es quel style ?</div>
+      <div class="choices" data-q="q2" data-label="Style préféré">
+        <button class="btn" type="button">🎬 Séries</button>
+        <button class="btn" type="button">🐉 Films animés / manga</button>
+        <button class="btn" type="button">🕺 Djo (toi-même tu es ton film 😂)</button>
+      </div>
+
+      <div class="q">3) Et si quelque chose te dépasse… tu dis quoi ?</div>
+      <div class="choices" data-q="q3" data-label="Réaction culte">
+        <button class="btn" type="button">😭 Hééé Seigneur !</button>
+        <button class="btn" type="button">🤦‍♀️ Arafat avait raison…</button>
+        <button class="btn" type="button">🙏 Anitché deh Maman</button>
+        <button class="btn" type="button">💻 Tiens ton ordinateur.</button>
+      </div>
+
+      <p class="hint">Si tu acceptes de continuer pour discuter, clique sur <b>CONTINUER</b>. Si je te casse les pieds, mets <b>NON MERCI</b> 😄</p>
+
+      <div class="actions">
+        <a class="action" id="continue" href="#" role="button">[ CONTINUER ]</a>
+        <a class="action" href="#" id="nope" role="button">[ NON MERCI ]</a>
+      </div>
+      <p class="small">*Choisis une réponse par question. Si tu continues, tes réponses seront proposées dans le message WhatsApp (tu peux les modifier avant d'envoyer).* </p>
+    </div>
+
+    <div class="footer">&gt; Fin du programme. Bonne journée 👋</div>
+  </div>
+
+  <!-- MODAL: Non merci -->
+  <div class="overlay" id="modalNope" role="dialog" aria-modal="true" aria-labelledby="nopeTitle">
+    <div class="modal">
+      <h3 id="nopeTitle">&gt; Requête refusée</h3>
+      <div class="big">ANITCHÉ DEH MAMAN</div>
+      <p class="sub">C'est difficile même 😂</p>
+      <div class="row">
+        <button class="btn" id="closeNope" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Continuer (prévisualise + texte WhatsApp) -->
+  <div class="overlay" id="modalGo" role="dialog" aria-modal="true" aria-labelledby="goTitle">
+    <div class="modal">
+      <h3 id="goTitle">&gt; Euuuss elle a accepté Fami 😂</h3>
+      <p>Si tu acceptes de continuer à discuter, tu seras redirigée vers WhatsApp (tu peux modifier le message avant d'envoyer).</p>
+      <p><b>Tu as bien dit que :</b></p>
+      <div id="answersPreview" class="preview">(Aucune réponse sélectionnée pour l'instant)</div>
+      <div class="row">
+        <button class="btn" id="cancelGo" type="button">Modifier mes réponses</button>
+        <a class="btn" id="goNow" href="#" target="_blank">Continuer → WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Sélection: une seule réponse par question ---
+    document.querySelectorAll('.choices').forEach(function(group){
+      group.addEventListener('click', function(e){
+        var target = e.target.closest('.btn');
+        if (!target) return;
+        group.querySelectorAll('.btn').forEach(function(b){ b.classList.remove('selected'); });
+        target.classList.add('selected');
+      });
+    });
+
+    // Helpers modals
+    function show(el){ el.style.display='flex'; }
+    function hide(el){ el.style.display='none'; }
+
+    // Bouton NON MERCI → popup "Anitché deh Maman"
+    var modalNope = document.getElementById('modalNope');
+    document.getElementById('nope').addEventListener('click', function(e){ e.preventDefault(); show(modalNope); });
+    document.getElementById('closeNope').addEventListener('click', function(){ hide(modalNope); });
+    modalNope.addEventListener('click', function(e){ if (e.target === modalNope) hide(modalNope); });
+
+    // Récupère les réponses sélectionnées
+    function getAnswers(){
+      var groups = Array.prototype.slice.call(document.querySelectorAll('.choices'));
+      return groups.map(function(g){
+        var label = g.getAttribute('data-label') || 'Question';
+        var sel = g.querySelector('.btn.selected');
+        return { label: label, value: sel ? sel.textContent.trim() : '(non répondu)' };
+      });
+    }
+
+    function buildWhatsAppText(){
+      var answers = getAnswers();
+      var intro = "Salut, c'est moi qui ai scanné le QR. Si tu es ok, on peut discuter tranquille.\n\nMes réponses :";
+      var lines = answers.map(function(a){ return "• " + a.label + ": " + a.value; });
+      var outro = "\n\n(PS: Tu peux enregistrer mon contact si tu veux 😉)";
+      return intro + "\n" + lines.join('\n') + outro;
+    }
+
+    // CONTINUER → affiche les réponses puis prépare le lien WhatsApp
+    var modalGo = document.getElementById('modalGo');
+    var preview = document.getElementById('answersPreview');
+    var goNow = document.getElementById('goNow');
+
+    function composeUrl(){
+      var waText = encodeURIComponent(buildWhatsAppText());
+      var url = 'https://wa.me/2250153400027?text=' + waText;
+      goNow.setAttribute('href', url);
+      goNow.setAttribute('target', '_blank');
+      show(modalGo);
+    }
+
+    document.getElementById('continue').addEventListener('click', function(e){
+      e.preventDefault();
+      var answers = getAnswers();
+      var text = answers.map(function(a){ return '- ' + a.label + ' : ' + a.value; }).join('\n');
+      preview.textContent = text.length ? text : '(Aucune réponse sélectionnée)';
+      composeUrl();
+    });
+
+    document.getElementById('cancelGo').addEventListener('click', function(){ hide(modalGo); });
+    modalGo.addEventListener('click', function(e){ if (e.target === modalGo) hide(modalGo); });
+  </script>
+</body>
+</html>
